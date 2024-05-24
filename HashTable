@@ -1,0 +1,106 @@
+class HashTable<K, V> {
+    private class HashNode<K, V> {
+        K key;
+        V value;
+        HashNode<K, V> next;
+
+        public HashNode(K key, V value) {
+            this.key = key;
+            this.value = value;
+        }
+    }
+
+    private LinkedList<HashNode<K, V>>[] chainArray;
+    private int M;  // Размер таблицы
+    private int size;  // Количество элементов в таблице
+
+    public HashTable() {
+        this(11);  // Конструктор по умолчанию с размером таблицы 11
+    }
+
+    public HashTable(int M) {
+        this.M = M;
+        chainArray = new LinkedList[M];
+        for (int i = 0; i < M; i++) {
+            chainArray[i] = new LinkedList<>();
+        }
+    }
+
+    private int hash(K key) {
+        int hashCode = customHashCode(key);
+        return Math.abs(hashCode) % M;
+    }
+
+    private int customHashCode(K key) {
+        String keyString = key.toString();
+        int hash = 0;
+        for (int i = 0; i < keyString.length(); i++) {
+            hash = 31 * hash + keyString.charAt(i);
+        }
+        return hash;
+    }
+
+    public void put(K key, V value) {
+        int index = hash(key);
+        LinkedList<HashNode<K, V>> chain = chainArray[index];
+
+        for (HashNode<K, V> node : chain) {
+            if (node.key.equals(key)) {
+                node.value = value;  // Обновление значения, если ключ уже существует
+                return;
+            }
+        }
+
+        chain.add(new HashNode<>(key, value));
+        size++;
+    }
+
+    public V get(K key) {
+        int index = hash(key);
+        LinkedList<HashNode<K, V>> chain = chainArray[index];
+
+        for (HashNode<K, V> node : chain) {
+            if (node.key.equals(key)) {
+                return node.value;
+            }
+        }
+
+        return null;  // Возвращает null, если ключ не найден
+    }
+
+    public V remove(K key) {
+        int index = hash(key);
+        LinkedList<HashNode<K, V>> chain = chainArray[index];
+
+        for (HashNode<K, V> node : chain) {
+            if (node.key.equals(key)) {
+                chain.remove(node);
+                size--;
+                return node.value;
+            }
+        }
+
+        return null;  // Возвращает null, если ключ не найден
+    }
+
+    public int size() {
+        return size;
+    }
+
+    public boolean isEmpty() {
+        return size == 0;
+    }
+
+    public static void main(String[] args) {
+        HashTable<String, Integer> table = new HashTable<>();
+        table.put("one", 1);
+        table.put("two", 2);
+        table.put("three", 3);
+
+        System.out.println("Size: " + table.size());  // Выводит: Size: 3
+        System.out.println("Value for key 'two': " + table.get("two"));  // Выводит: Value for key 'two': 2
+        System.out.println("Removing key 'one' with value: " + table.remove("one"));  // Выводит: Removing key 'one' with value: 1
+        System.out.println("Size after removal: " + table.size());  // Выводит: Size after removal: 2
+        System.out.println("Value for key 'one': " + table.get("one"));  // Выводит: Value for key 'one': null
+    }
+}
